@@ -1,4 +1,4 @@
-Notificaciones API
+Notifications API
 Notification management for authenticated users, sent by email, SMS or push notification.
 Built with Python and FastAPI as a take-home challenge.
 
