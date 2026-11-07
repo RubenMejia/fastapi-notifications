@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Environment files: only the example and the test file are committed
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Node (frontend, Epic 5)
+node_modules/
+dist/
+
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
