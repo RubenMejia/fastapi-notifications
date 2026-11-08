@@ -24,13 +24,13 @@ class Settings(BaseSettings):
         "database_url"
     )  # this decorator is used to validate the database_url field / property.
     @classmethod  # this decorator is used to define a class method.
-    def use_apycng_driver(cls, url: str) -> str:
+    def use_asyncpg_driver(cls, url: str) -> str:
         # this is a docstring. it is a string that describes the function.
         """Hosting platforms hand out postgres:// URLs; async SQLAlchemy needs asyncpg."""
-        for prefix in ("postgres://", "postgresql://"):
+        for prefix in ("postgresql+asyncpg://", "postgres://", "postgresql://"):
             if url.startswith(prefix):
                 return "postgresql+asyncpg://" + url.removeprefix(prefix)
-        raise ValueError(f"DATABASE_URL must be a PostgreSQL URL: {url}")
+        raise ValueError("DATABASE_URL must be a PostgreSQL URL")
 
 
 # this is a singleton instance of Settings class, which is used to access the configuration settings
