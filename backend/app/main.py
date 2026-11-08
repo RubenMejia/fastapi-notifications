@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 # import settings. A missing variable stops the server at import time before it accepts any request.
 from app.core.config import settings
+from app.db.session import engine
 from app.routers import health
 
 # prints next to the server's own startup lines.
@@ -29,8 +30,9 @@ async def lifespan(app: FastAPI):
     # example: def my_generator(): yield 1; yield 2; yield 3;
     # my_generator() will return a generator object that can be used to iterate over values 1, 2, 3.
     yield
-
     # shutdown: close whatever startup opened
+    await engine.dispose()  # close every pooled connection
+    logger.info("Database connections closed")
 
 
 app = FastAPI(
