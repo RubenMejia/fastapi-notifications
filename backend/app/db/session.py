@@ -8,7 +8,8 @@ from app.core.config import settings
 # pool_pre_ping=True means that the connection will be pinged before being used.
 engine = create_async_engine(settings.database_url, pool_pre_ping=True)
 # the session factory, one per app. creates and closes sessions.
-# expire_on_commit=False means that the session is not expired until the request ends.
+# expire_on_commit=False: objects keep their loaded values after commit(), because
+# async code cannot lazily reload expired attributes.
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 

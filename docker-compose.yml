@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: notifications
     ports:
-      - "5432:5432" # para que se pueda acceder a la base de datos desde el exterior x:y donde x es el puerto de la base de datos y y es el puerto de la maquina host
+      - "5432:5432" # HOST:CONTAINER, so the app on the host reaches Postgres at localhost:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -15,4 +15,4 @@ services:
       timeout: 3s
       retries: 15
 volumes:
-  pgdata: #para que se mantengan los datos de la base de datos
+  pgdata: # named volume, so the data survives container restarts and recreation
