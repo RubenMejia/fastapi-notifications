@@ -1,6 +1,7 @@
 import os
 
-os.environ["APP_ENV"] = "test"  # before any app import: settings must read .env.test.
+# before any app import: settings must read .env.test. if not set, database will refuse to connect.
+os.environ["APP_ENV"] = "test"
 
 from collections.abc import AsyncIterator
 
