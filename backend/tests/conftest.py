@@ -7,7 +7,7 @@ from collections.abc import AsyncIterator
 import pytest
 from alembic import command
 from alembic.config import Config
-from httpx import ASGITrasnport, AsyncClient
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import make_url, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
@@ -18,7 +18,7 @@ from app.db.session import get_db, get_session_factory
 from app.main import app
 
 # Safety guard: never run tests againt a database whose name does not end in _test.
-TEST_DB_NAME = make_url(settings.DATABASE_URL).database or ""
+TEST_DB_NAME = make_url(settings.database_url).database or ""
 if not TEST_DB_NAME.endswith("_test"):
     raise RuntimeError(f"Refusing to run tests against database {TEST_DB_NAME!r}")
 
@@ -31,7 +31,7 @@ def run_migrations() -> None:
     command.upgrade(config, "head")
 
 
-test_engine = create_async_engine(settings.DATABASE_URL, poolclass=NullPool)
+test_engine = create_async_engine(settings.database_url, poolclass=NullPool)
 testSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
@@ -56,6 +56,6 @@ async def client(db: AsyncSession) -> AsyncIterator[AsyncClient]:
     """Calls the app in-process, its database dependencies point to the test database."""
     app.dependency_overrides[get_db] = lambda: db  # use lambda to avoid circular import.
     app.dependency_overrides[get_session_factory] = lambda: testSessionLocal()
-    async with AsyncClient(transport=ASGITrasnport(app=app), base_url="http://test") as c:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
