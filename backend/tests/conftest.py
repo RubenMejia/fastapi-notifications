@@ -55,8 +55,9 @@ async def db() -> AsyncIterator[AsyncSession]:
 @pytest.fixture
 async def client(db: AsyncSession) -> AsyncIterator[AsyncClient]:
     """Calls the app in-process, its database dependencies point to the test database."""
-    app.dependency_overrides[get_db] = lambda: db  # use lambda to avoid circular import.
-    app.dependency_overrides[get_session_factory] = lambda: testSessionLocal()
+    # lambda hands back the test's own session. So the test sees exactly what the endpoint wrote.
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_session_factory] = lambda: testSessionLocal
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
