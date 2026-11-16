@@ -1,12 +1,14 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 
 # import settings. A missing variable stops the server at import time before it accepts any request.
 from app.core.config import settings
+from app.core.errors import EmailAlreadyRegisteredError
 from app.db.session import engine
-from app.routers import health
+from app.routers import auth, health
 
 # prints next to the server's own startup lines.
 # that means we can see the logs in the terminal where the server is running.useful for debugging.
@@ -43,3 +45,15 @@ app = FastAPI(
 )
 
 app.include_router(health.router)
+app.include_router(auth.router)
+
+
+@app.exception_handler(EmailAlreadyRegisteredError)
+async def email_already_registered_handler(
+    request: Request,
+    exc: EmailAlreadyRegisteredError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": "Email already registered"},
+    )
