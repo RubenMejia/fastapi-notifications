@@ -1,5 +1,7 @@
 from collections.abc import AsyncIterator
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
@@ -24,3 +26,7 @@ async def get_db() -> AsyncIterator[AsyncSession]:
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
     """For code that must open its own sessions, such as background jobs (NOT-09)."""
     return SessionLocal
+
+
+# Shorthand for route and dependency parameters: `db: DbSession`.
+DbSession = Annotated[AsyncSession, Depends(get_db)]

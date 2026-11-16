@@ -4,7 +4,9 @@ Notification management for authenticated users, sent by email, SMS or push noti
 Built with Python and FastAPI as a take-home challenge.
 
 ## Features
-_Filled in as features land (NOT-04 to NOT-11)._
+- Register with email and password (`POST /api/auth/register`)
+
+_More as features land (NOT-05 to NOT-11)._
 
 ## How to run
 **Prerequisites (local development):** Python 3.13, [uv](https://docs.astral.sh/uv/) and Docker.
@@ -42,12 +44,19 @@ Interactive documentation: `/docs` (Swagger UI) and `/redoc`.
 - **PostgreSQL in Docker for local development:** one command gives every developer the same database version.
 - **Alembic migrations from the first table:** versioned, reversible schema changes instead of `create_all`, with a naming convention that gives every constraint a predictable name.
 - **Separate test database (`notifications_test`, port 5433, in memory):** tests can never touch dev data. A guard in `tests/conftest.py` refuses any database whose name does not end in `_test`. Migrations run once per test session and every table is emptied before each test, so tests are independent and run in any order.
+- **Argon2 password hashing (pwdlib), off the event loop:** passwords are stored only as Argon2id hashes. Hashing runs in a worker thread, so one registration never stalls other requests.
+- **Emails stored lowercase:** uniqueness is case-insensitive, so `Ana@Example.com` and `ana@example.com` are the same account.
+- **Domain errors mapped to HTTP in one place:** services raise `EmailAlreadyRegisteredError` and `main.py` maps it to 409. The unique constraint backs the service's pre-check, so two simultaneous registrations still get a 409, never a 500.
+- **Strict input:** unknown fields are rejected with 422, and passwords must be 8 to 128 characters.
+- **422 responses never echo what was sent:** FastAPI's default validation error repeats each rejected value, which would return a password to the client. A handler in `main.py` keeps the error's type, location and message and drops the value.
 
 ## Areas to improve
 - A readiness check that also pings the database; today `/health` only proves the process is up.
+- Case-insensitive uniqueness is enforced by the API, which lowercases emails. A unique index on `lower(email)`, or a `CITEXT` column, would also cover writes that bypass the API.
+- Registration reveals whether an email already exists (409). That is fine for this challenge; a production sign-up could answer the same way in both cases and confirm by email.
 
 ## Technologies
-Python 3.13 · FastAPI · SQLAlchemy 2.0 (async) · Alembic · PostgreSQL 16 · Docker · pydantic-settings · Ruff · pre-commit
+Python 3.13 · FastAPI · SQLAlchemy 2.0 (async) · Alembic · PostgreSQL 16 · Docker · pydantic-settings · Ruff · pre-commit · pwdlib (Argon2)
 
 ## Author
 Ruben · [LinkedIn](https://www.linkedin.com/in/rubenmejia77/) · [GitHub](https://github.com/RubenMejia)

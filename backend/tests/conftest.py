@@ -18,7 +18,7 @@ from app.db.base import Base
 from app.db.session import get_db, get_session_factory
 from app.main import app
 
-# Safety guard: never run tests againt a database whose name does not end in _test.
+# Safety guard: never run tests against a database whose name does not end in _test.
 TEST_DB_NAME = make_url(settings.database_url).database or ""
 if not TEST_DB_NAME.endswith("_test"):
     raise RuntimeError(f"Refusing to run tests against database {TEST_DB_NAME!r}")
@@ -38,7 +38,7 @@ testSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
 
 @pytest.fixture(autouse=True)
 async def clean_db() -> None:
-    """Every test starts with a empty tables."""
+    """Every test starts with empty tables."""
     tables = ", ".join(f'"{table.name}"' for table in Base.metadata.sorted_tables)
     if tables:
         async with test_engine.begin() as conn:
@@ -55,8 +55,9 @@ async def db() -> AsyncIterator[AsyncSession]:
 @pytest.fixture
 async def client(db: AsyncSession) -> AsyncIterator[AsyncClient]:
     """Calls the app in-process, its database dependencies point to the test database."""
-    app.dependency_overrides[get_db] = lambda: db  # use lambda to avoid circular import.
-    app.dependency_overrides[get_session_factory] = lambda: testSessionLocal()
+    # lambda hands back the test's own session. So the test sees exactly what the endpoint wrote.
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_session_factory] = lambda: testSessionLocal
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
