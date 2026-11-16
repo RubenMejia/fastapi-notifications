@@ -19,10 +19,13 @@ class UserRepository:
             await self.db.commit()
         except IntegrityError as exc:
             await self.db.rollback()
-            if "uq_users_email" in str(
-                exc.orig
-            ):  # the nasme comes from the naming convention defined in base.py
+            # the name comes from the naming convention defined in base.py
+            if "uq_users_email" in str(exc.orig):
                 raise EmailAlreadyRegisteredError(user.email) from exc
+            # Any other integrity error (a NOT NULL or another constraint) is a bug, not a user
+            # mistake: re-raise it so it surfaces as a 500 and in the logs. No test reaches this
+            # line because the schema and the model already prevent those errors, so coverage
+            # reports it as missed. That is expected.
             raise
         await self.db.refresh(user)  # loads what the database filled in: id, created_at
 

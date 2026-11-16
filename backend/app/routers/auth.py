@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from app.db.session import DBsesion
+from app.db.session import DbSession
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import AuthService
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 # Dependency injection function, like a constructor
-def get_auth_service(db: DBsesion) -> AuthService:
+def get_auth_service(db: DbSession) -> AuthService:
     return AuthService(UserRepository(db))
 
 

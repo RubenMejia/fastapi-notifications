@@ -18,7 +18,7 @@ from app.db.base import Base
 from app.db.session import get_db, get_session_factory
 from app.main import app
 
-# Safety guard: never run tests againt a database whose name does not end in _test.
+# Safety guard: never run tests against a database whose name does not end in _test.
 TEST_DB_NAME = make_url(settings.database_url).database or ""
 if not TEST_DB_NAME.endswith("_test"):
     raise RuntimeError(f"Refusing to run tests against database {TEST_DB_NAME!r}")
@@ -38,7 +38,7 @@ testSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
 
 @pytest.fixture(autouse=True)
 async def clean_db() -> None:
-    """Every test starts with a empty tables."""
+    """Every test starts with empty tables."""
     tables = ", ".join(f'"{table.name}"' for table in Base.metadata.sorted_tables)
     if tables:
         async with test_engine.begin() as conn:

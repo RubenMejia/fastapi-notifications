@@ -72,6 +72,23 @@ async def test_register_response_has_no_password(client: AsyncClient) -> None:
     assert set(response.json()) == {"id", "email", "created_at"}
 
 
+# FastAPI's default 422 echoes the rejected values; the password must never be one of them.
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"email": "ana@example.com", "password": "short7!"},
+        {"email": "ana@example.com", "password": "S3cret-pass" * 12},
+        {"password": "S3cret-pass"},
+    ],
+    ids=["short_password", "long_password", "missing_email"],
+)
+async def test_validation_error_does_not_echo_password(client: AsyncClient, body: dict) -> None:
+    response = await client.post(REGISTER_URL, json=body)
+
+    assert response.status_code == 422
+    assert body["password"] not in response.text
+
+
 async def test_password_is_stored_hashed(client: AsyncClient, db: AsyncSession) -> None:
     await client.post(REGISTER_URL, json=VALID)
 

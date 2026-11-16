@@ -48,6 +48,7 @@ Interactive documentation: `/docs` (Swagger UI) and `/redoc`.
 - **Emails stored lowercase:** uniqueness is case-insensitive, so `Ana@Example.com` and `ana@example.com` are the same account.
 - **Domain errors mapped to HTTP in one place:** services raise `EmailAlreadyRegisteredError` and `main.py` maps it to 409. The unique constraint backs the service's pre-check, so two simultaneous registrations still get a 409, never a 500.
 - **Strict input:** unknown fields are rejected with 422, and passwords must be 8 to 128 characters.
+- **422 responses never echo what was sent:** FastAPI's default validation error repeats each rejected value, which would return a password to the client. A handler in `main.py` keeps the error's type, location and message and drops the value.
 
 ## Areas to improve
 - A readiness check that also pings the database; today `/health` only proves the process is up.

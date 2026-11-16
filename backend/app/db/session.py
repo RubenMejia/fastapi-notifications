@@ -29,4 +29,4 @@ def get_session_factory() -> async_sessionmaker[AsyncSession]:
 
 
 # Shorthand for route and dependency parameters: `db: DbSession`.
-DBsesion = Annotated[AsyncSession, Depends(get_db)]
+DbSession = Annotated[AsyncSession, Depends(get_db)]

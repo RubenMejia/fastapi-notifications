@@ -14,4 +14,4 @@ async def test_add_duplicate_email_raises_domain_error(db: AsyncSession) -> None
     with pytest.raises(EmailAlreadyRegisteredError):
         await users.add(User(email="test@example.com", hashed_password="y"))
 
-    assert await users.get_by_email("test@example.com") is not None  # session still useable
+    assert await users.get_by_email("test@example.com") is not None  # session still usable
